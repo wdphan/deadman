@@ -7,9 +7,11 @@ pragma solidity >=0.8.0;
  * @dev A beneficiary account
  **/
 
-import "/Users/williamphan/Desktop/Developer/deadman/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import { Vm } from 'forge-std/Vm.sol';
+import { Deadman } from '/Users/williamphan/Desktop/Developer/deadman/src/Deadman.sol';
+import { DSTest } from 'ds-test/test.sol';
 
-abstract contract Deadman is ERC20 {
+abstract contract Deadman is DSTest {
     /// -----------------------------------
     /// -------- BASIC INFORMATION --------
     /// -----------------------------------
