@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity >=0.8.0;
 
 /**
  * @title Deadman
  * @dev A beneficiary account
  **/
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
+import "/Users/williamphan/Desktop/Developer/deadman/lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 abstract contract Deadman is ERC20 {
-    
     /// -----------------------------------
     /// -------- BASIC INFORMATION --------
     /// -----------------------------------
@@ -53,11 +52,14 @@ abstract contract Deadman is ERC20 {
     /// -----------------------------------
 
     /// @notice An event emitted when someone redeems all ERC20 tokens
-    event Claim(address indexed protocol, address indexed claimer, uint256 liveAmount);
+    event Claim(
+        address indexed protocol,
+        address indexed claimer,
+        uint256 liveAmount
+    );
 
     /// @notice An event emitted when someone pings the account
     event PingPlaced(address indexed owner, uint256 timestamp);
-
 
     /// --------------------------------
     /// -------- VIEW FUNCTIONS --------
@@ -137,7 +139,7 @@ abstract contract Deadman is ERC20 {
 
     // ping the account to notify owner is still alive - in replace of placing a bid
     function placePing() external payable {
-        require(accountState == State.live , "Account is inactive");
+        require(accountState == State.live, "Account is inactive");
 
         // If bid is within 15 minutes of auction end, extend auction
         if (accountLength - block.timestamp <= 15 minutes) {
@@ -147,4 +149,3 @@ abstract contract Deadman is ERC20 {
         emit PingPlaced(msg.sender, block.timestamp);
     }
 }
-
