@@ -7,9 +7,9 @@ pragma solidity >=0.8.0;
  * @dev A beneficiary account
  **/
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-contract Deadman is ERC20Upgradeable{
+contract Deadman is ERC20Upgradeable {
     /// -----------------------------------
     /// -------- BASIC INFORMATION --------
     /// -----------------------------------
@@ -47,6 +47,11 @@ contract Deadman is ERC20Upgradeable{
 
     State public accountState;
 
+    constructor(address _owner) {
+        _owner = address(this);
+        accountState = State.live;
+    }
+
     /// -----------------------------------
     /// ------------- EVENTS --------------
     /// -----------------------------------
@@ -83,29 +88,29 @@ contract Deadman is ERC20Upgradeable{
     // --------------------------------
 
     // depositor/owner initializes the account
-    function initialize (
-        address _owner,
+    function initialize(
         address _backup,
         uint256 _minAmount,
         uint256 _liveAmount,
-        uint256 _fee,
-        string memory _name, string memory _symbol
+        string memory _name,
+        string memory _symbol
     ) external {
-
-         __ERC20_init(_name, _symbol);
+        // initialize inherited contracts
+        __ERC20_init(_name, _symbol);
         // set storage variables
-        accountState = State.live;
-        owner = _owner;
         backup = _backup;
         accountLength = 15 minutes;
         liveAmount = _liveAmount;
-        fee = _fee;
         minAmount = _minAmount;
     }
 
-    // minimum deposit needed in order to initialize account
-    function minDeposit(uint256 _minAmount) public pure {
-        require(_minAmount >= 30000000000000000000 wei, "Doesn't meet minimum deposit");
+    // deposits tokens into the protocol
+    function deposit(uint256 depositAmount) public payable {
+        require(msg.value == depositAmount);
+        require(
+            msg.value >= 1000000000000000000 wei,
+            "does not meet minimum deposit!"
+        );
     }
 
     //updates the current owner of the locked up tokens
@@ -121,9 +126,13 @@ contract Deadman is ERC20Upgradeable{
     }
 
     // timer ends, auction ends, and tokens are sent to new owner
-    function close() external {
+    function close(uint256 amount) external {
         require(accountState == State.ended, "The account is still live");
         require(block.timestamp >= accountClosed, "The account is still live");
+        require(
+            amount >= 1000000000000000000 wei,
+            "account can't withdraw - add more funds"
+        );
 
         accountState = State.ended;
 
@@ -150,4 +159,3 @@ contract Deadman is ERC20Upgradeable{
         emit PingPlaced(msg.sender, block.timestamp);
     }
 }
-
