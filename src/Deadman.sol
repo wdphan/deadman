@@ -7,11 +7,9 @@ pragma solidity >=0.8.0;
  * @dev A beneficiary account
  **/
 
-import { Vm } from 'forge-std/Vm.sol';
-import { Deadman } from '/Users/williamphan/Desktop/Developer/deadman/src/Deadman.sol';
-import { DSTest } from 'ds-test/test.sol';
+import "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-abstract contract Deadman is DSTest {
+contract Deadman is ERC20Upgradeable{
     /// -----------------------------------
     /// -------- BASIC INFORMATION --------
     /// -----------------------------------
@@ -60,7 +58,7 @@ abstract contract Deadman is DSTest {
         uint256 liveAmount
     );
 
-    /// @notice An event emitted when someone pings the account
+    // @notice An event emitted when someone pings the account
     event PingPlaced(address indexed owner, uint256 timestamp);
 
     /// --------------------------------
@@ -80,42 +78,43 @@ abstract contract Deadman is DSTest {
         return accountLength;
     }
 
-    /// --------------------------------
-    /// -------- CORE FUNCTIONS --------
-    /// --------------------------------
+    // --------------------------------
+    // -------- CORE FUNCTIONS --------
+    // --------------------------------
 
     // depositor/owner initializes the account
-    function initialize(
+    function initialize (
         address _owner,
         address _backup,
         uint256 _minAmount,
         uint256 _liveAmount,
-        uint256 _fee
+        uint256 _fee,
+        string memory _name, string memory _symbol
     ) external {
+
+         __ERC20_init(_name, _symbol);
         // set storage variables
-        accountState = State.inactive;
+        accountState = State.live;
         owner = _owner;
         backup = _backup;
         accountLength = 15 minutes;
         liveAmount = _liveAmount;
         fee = _fee;
         minAmount = _minAmount;
-
-        _mint(_owner, _liveAmount);
     }
 
     // minimum deposit needed in order to initialize account
     function minDeposit(uint256 _minAmount) public pure {
-        require(_minAmount >= 130000 ether, "Doesn't meet minimum deposit");
+        require(_minAmount >= 30000000000000000000 wei, "Doesn't meet minimum deposit");
     }
 
-    // updates the current owner of the locked up tokens
+    //updates the current owner of the locked up tokens
     function updateOwner(address _owner) external {
         require(msg.sender == owner, "You're not the owner");
         owner = _owner;
     }
 
-    // sets the backup addresses, ultimately looped through
+    //sets the backup addresses, ultimately looped through
     function updateBackup(address _backup) external {
         require(msg.sender == owner, "You're not the owner!");
         backup = _backup;
@@ -129,15 +128,15 @@ abstract contract Deadman is DSTest {
         accountState = State.ended;
 
         // transfer erc20 to backup because owner did not ping
-        ERC20.transferFrom(address(this), backup, liveAmount);
+        ERC20Upgradeable.transferFrom(address(this), backup, liveAmount);
 
         // emit the transfer event
         emit Claim(address(this), backup, liveAmount);
     }
 
-    /// --------------------------------
-    /// ------------ PING --------------
-    /// --------------------------------
+    // --------------------------------
+    // ------------ PING --------------
+    // --------------------------------
 
     // ping the account to notify owner is still alive - in replace of placing a bid
     function placePing() external payable {
@@ -151,3 +150,4 @@ abstract contract Deadman is DSTest {
         emit PingPlaced(msg.sender, block.timestamp);
     }
 }
+

@@ -5,16 +5,18 @@ import {DSTest} from "ds-test/test.sol";
 import {Utilities} from "./utils/Utilities.sol";
 import {console} from "./utils/Console.sol";
 import {Vm} from "forge-std/Vm.sol";
+import {Deadman} from "../Deadman.sol";
 
 contract ContractTest is DSTest {
     Vm internal immutable vm = Vm(HEVM_ADDRESS);
 
+    Deadman internal deadman;
     Utilities internal utils;
     address payable[] internal users;
 
     function setUp() public {
-        utils = new Utilities();
-        users = utils.createUsers(5);
+        Deadman = new Deadman();
+        users = utils.createUsers(3);
     }
 
     function testExample() public {
